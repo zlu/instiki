@@ -1,502 +1,234 @@
 body {
-background-color:#FFF;
-color:#333;
-font-family:Verdana, Arial, Helvetica, sans-serif;
-font-size:1em;
-line-height:1.3em;
+ background-color:#000000;
+ color: #FFFFFF;
+ font-family: "lucida grande", tahoma, verdana, helvetica, arial, sans-serif;
+ font-size:13px;
+ width:90%;
+ margin:0 auto;
+ padding:10px;
 }
 
-.skipNav {
-position:relative;
-left:-1000em;
-font-size:0em;
+#Container, #Content {
+    width:auto;
 }
 
-#Container {
-margin:0 10px;
-text-align:center;
+table * br {
+    display:none;
 }
 
-#Content {
-border-top:none;
-margin:auto;
-padding:0.3em;
-text-align:left;
-width:100%;
-max-width:55em;
-}
 
-a:visited {
-color:#666;
-}
+a { color: #00c; }
 
-h1,h2,h3,h4,h5,h6 {
-color:#333;
-font-family:georgia, verdana, sans-serif;
-}
+.newWikiWord { background-color: #eee; }
+.newWikiWord a:hover { background-color: white; }
 
-h1 {
-font-size:200%;
-}
+a:visited { color: #006; }
+a:hover { color: #00f; }
 
-h2 {
-font-size:173%;
-}
+/* a.edit:link, a.edit:visited { color: #DA0006; } */
 
-h3 {
-font-size:144%;
-}
 
-h4 {
-font-size:120%;
-}
-
-h5,h6 {
-font-size:100%
-}
+h1, h2, h3, h4, h5 { color: #f90; font-weight:bold; border-bottom:solid 1px #555555; padding-bottom:3px; }
+h1 { font-size: 20px }
+h2 { font-size: 16px; color:#f60; }
+h3 { font-size: 13px; color:#f30; }
+h4 { font-size: 12px; color:#f10; }
+h5 { font-size: 11px; color:#c20;}
 
 h1#pageName {
-line-height:1em;
-margin:0.2em 0 0.2em 0;
-padding:0;
+margin: 5px 0px 0px 0px;
+padding: 0px 0px 0px 0px;
+line-height: 28px;
+font-size:24px;
+color:#f30;
 }
 
-#svg_logo {
-float:left;
-margin:.5em .25em 0 -.625em;
-width:1.5em;
-height:1.625em;
+h1#pageName small {
+  color: grey;
+  line-height: 10px;
+  font-size: 10px;
+  padding: 0px;
 }
 
-a.nav,a:link.nav, a:visited.nav {
-background-color:#FFF;
-color:#000;
-}
+a.nav, a.nav:link, a.nav:visited { color: #000; }
+a.nav:hover { color: #fff; background-color:#000; }
 
-table {
-border:double #000;
-border-collapse:collapse;
-}
-
-td {
-border:thin solid #888;
-}
-
-li {
-margin-bottom:0.5em;
-}
-
-.newWikiWord {
-background-color:#DDD;
-}
-
-.newWikiWord a:hover {
-background-color:#FFF;
-}
-
-.deleteWikiWord {
-background-color:#FCC;
-border: 3px solid blue;
-padding: 2px;
-}
-
-.deleteWikiWord:hover, .deleteWikiWord a:hover {
-background-color:#F88;
-}
-
-
-form#navigationSearchForm {
-display:inline;
-}
-
-form#navigationSearchForm input {
-font-size:80%;
-}
+li { margin-bottom: 7px }
 
 .navigation {
-color:#555;
-font-size:90%;
-margin-top:0.3em;
+  margin-top: 5px;
+font-size : 12px;
+  color: #333;
 }
 
-.navigation a:hover {
-background-color:#000;
-color:#FFF;
-text-decoration:none;
-}
+.navigation a:hover { color: #f30; text-decoration:underline;}
 
 .navigation a {
-color:#000;
-font-weight:bold;
+font-size: 10px;
+color: #528F6C;
+font-weight: normal;
+text-decoration:none;
 }
 
 .navigation small a {
-font-size:90%;
-font-weight:normal;
+  font-weight: normal;
+  font-size: 11px;
+}
+  
+.navOn{
+font-size: 11px;
+color: grey;
+font-weight: bold;
+text-decoration: none;
 }
 
-.navOn {
-color:#444;
-font-weight:bold;
-text-decoration:none;
+.help {
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 11px;
 }
 
-div.help {
-font-family:verdana, arial, helvetica, sans-serif;
-font-size:75%;
-}
-
-div.inputBox {
-background-color:#EEE;
-font-family:verdana, arial, helvetica, sans-serif;
-font-size:80%;
-margin-bottom:1.5em;
-padding:0.3em;
+.inputBox {
+font-family: verdana, arial, helvetica, sans-serif;
+font-size: 11px;
+  background-color: #eee;
+  padding: 5px;
+  margin-bottom: 20px;
 }
 
 blockquote {
-display:block;
-font-size:90%;
-font-style:italic;
-line-height:1.5em;
-margin:0 0 1.5em;
-padding:0 2.5em;
+display: block;
+margin: 0px 0px 20px 0px;
+padding: 0px 30px;
+font-size:11px;
+line-height:17px;
+  font-style: italic;  
 }
 
 pre {
-background-color:#DDD;
-font-size:90%;
-overflow:auto;
-padding:1em;
+  background-color: #222222;
+  border: 1px solid #555555;
+  padding: 10px;
+  font-size: 11px;
+  font-family: "lucida grande", tahoma, verdana, helvetica, arial, sans-serif;
 }
 
 ol.setup {
-font-family:georgia, verdana, sans-serif;
-font-size:110%;
-margin-top:1em;
-padding-left:1.5em;
+  font-size: 19px;
+  font-family: georgia, verdana;
+  padding-left: 25px;
+}
+
+ol.setup li {
+  margin-bottom: 20px
 }
 
 .byline {
-color:#666;
-font-size:.8em;
-font-style:italic;
-margin-bottom:1em;
-padding-top:1px;
+  font-size: 10px;
+  font-style: italic;  
+  margin-bottom: 10px;
+  color: #999;
 }
 
-p.show_diff {
-background: #eee;
+.references {
+  font-size: 10px;
+}
+
+.diffdel {
+  background: pink;
+}
+
+.diffins {
+  background: lightgreen;
+}
+
+#MarkupHelp {
+    float:right;
+    width:25%;
+    margin:0 0 0 10px;
+}
+
+#MarkupHelp table {
+margin-bottom: 0;
+}
+
+#MarkupHelp table+h3 {
+margin-top: 11px;
+}
+
+#MarkupHelp table td {
+font-size: 11px;
 padding: 3px;
-border: 1px solid silver;
-font-size:.85em;
+vertical-align: top;
+border-top: 1px dotted #ccc;
 }
 
-span.webName {
-font-size:.5em;
+#MarkupHelp table td.arrow {
+padding-right: 5px;
+padding-left: 10px;
+color: #999;
 }
 
-span.views, span.linked {
-font-size:.85em;
-}
-.views a, .linked a {
-font-weight: normal
-}
-span.revisions {
-font-size:.95em
+#MarkupHelp table td.label {
+font-weight: bold;
+white-space: nowrap;
+font-size: 10px;
+padding-right: 15px;
+color: #000;
 }
 
-#allPages, #wantedPages {
-float: left;
-width: 280px;
-}
-#allPages {
-margin-right: 30px;
-}
-#allPages h2, #wantedPages h2 {
-font-size: 1.2em;
-} 
-
-.pageType {
-font-size: .75em;
-font-style: italic;
+#MarkupHelp h3 {
+font-size: 11px;
+font-weight: bold;
+font-weight: normal;
+margin: 0 0 5px 0;
+padding: 5px 0 0 0;
 }
 
-p.pageStats, span.unlock {
-font-size: .85em;
+#MarkupHelp p {
+font-size: 10px;
 }
-
-.diffdel,del.diffmod, .diffdel *, del.diffmod * {
-background-color:#FAA;
-text-decoration:line-through;
-}
-
-.diffins,ins.diffmod, .diffins *, ins.diffmod * {
-background-color:#AFA;
-text-decoration:underline;
-}
-
-.diffmod, .diffmod * {
-border: 2px solid #FE0;
+ 
+.rightHandSide {
+   float: right;
+   width: 100px;
+   margin-left: 10px;
+   padding-left: 20px;
+   border-top: solid 1px #999;
+    border-left: solid 1px #999;
 }
 
 #footer {
-color:#666;
-font-size:.75em;
-font-style:italic;
-line-height:1.2em;
-padding-top:2em;
-text-align:right;
+    font-size:.8em;
+    color:#999;
 }
 
-#footer a:link,#footer a:visited {
-color:#777;
-font-style:italic;
-}
-#footer a:hover {
-color:#FFF;
+div.work {
+    float:left;
+    width:45%;
+    margin:0 2% 0 0;
+    padding:10px;
+    
+} 
+
+div.personal {
+    float:right;
+    width:45%;
+    margin: 0 0 0 2%;
+    padding:10px;
 }
 
-div.web_normal {
-	padding:4px;
+#changes {
+    clear:both;
 }
 
-div.web_protected {
-	padding:4px;
-	background-color:#DDD;
+.byline, #navigation, #up {
+    clear:both;
 }
 
-div.inputFieldWithPrompt {
-margin:0.75em 0;
+ins {
+    display:none;
 }
 
-div.errorExplanation {
-background-color:#FFA;
-color:#900;
-font-style:italic;
-font-weight:bold;
-margin:1.5em 0;
-padding:1em;
-width:100%;
+.fieldset {
+    border 1px solid #555555;
 }
-
-div.errorExplanation h2 {
-display:none;
-}
-
-div.errorExplanation ul {
-border:none;
-margin:0.5em 0 0 2em;
-padding:0;
-}
-
-div.fieldWithErrors input {
-border:1px solid #900;
-}
-
-div.info {
-background-color:#DDD;
-font-weight:bold;
-margin-top:0.5em;
-padding:0.5em;
-width:100%;
-}
-
-div#editFormButtons {
-margin:0.5em 0 0;
-}
-
-div#editFormButtons span {
-white-space:nowrap;
-}
-
-div#editForm textarea#content {
-}
-
-div#MarkupHelp {
-float:right;
-margin-top:0.5em;
-width:25%;
-}
-
-div#MarkupHelp table {
-border-bottom:3px solid #BBB;
-border-left:3px solid #999;
-border-right:3px solid #BBB;
-border-top:3px solid #999;
-margin-bottom:0;
-}
-
-div#MarkupHelp td {
-border:1px solid #999;
-border-width:1px 0;
-font-size:80%;
-margin:0;
-padding:0.2em;
-vertical-align:top;
-white-space:nowrap;
-}
-
-div#MarkupHelp td.arrow {
-color:#666;
-padding:0 0.75em 0 0;
-}
-
-div#MarkupHelp h3 {
-font-size:90%;
-font-weight:bold;
-margin:0 0 5px;
-padding:5px 0 0;
-}
-
-div#MarkupHelp p {
-font-size:70%;
-}
-
-div.rightHandSide {
-border-left:1px dotted #ccc;
-border-bottom:1px dotted #ccc;
-float:right;
-font-size:80%;
-margin-left:0.7em;
-padding-left:1.5em;
-width:25%;
-}
-
-.newsList {
-margin-top:1.5em;
-}
-
-.newsList p {
-margin-bottom:2.5em;
-}
-
-.property {
-color:#666;
-font-size:80%;
-}
-
-a,li span {
-color:#000;
-}
-
-a.existingWikiWord[title]{
-//border: 1px dashed #BBB;
-}
-
-.web_protected a.existingWikiWord[title], .web_normal a.existingWikiWord[title] {
-// border: none;
-}
-
-a:hover, a.nav:hover, a:hover math {
-background-color:#000;
-color:#FFF;
-}
-
-a:hover.existingWikiWord, a:visited:hover.existingWikiWord {
-background-color:#008;
-color:#FFF;
-}
-a:hover.existingWikiWord[title] {
-background-color:#707;
-color:#FFF;
-}
-.web_protected a:hover.existingWikiWord[title], .web_normal a:hover.existingWikiWord[title] {
-background-color:#000;
-color:#FFF;
-}
-
-div.errorExplanation p,div.errorExplanation li {
-border:none;
-margin:0;
-padding:0;
-}
-
-textarea#content {
-font-size: 1em;
-line-height: 1.125;
-}
-
-merror {display:inline;font-size:1em;}
-math[display=block] {overflow:auto;}
-math { white-space: nowrap }
-.maruku-eq-number {float:right}
-.maruku-equation {text-align:center}
-.blockquotesource {margin-left:1em;}
-fieldset.search {display:inline; border:none;padding:0;margin:0;top:5px;position:relative;}
-span.keyboard {
- background: #CCC;
- color: #000;
- border: outset 2px;
- font-family:verdana, arial, sans-serif;
- font-size: .7em;
- margin-left:5px;
- padding:1px 2px;
-}
-.centeredfigure {
- position:relative;
- margin:auto;
- text-align:center;
-}
-
-body {counter-reset: theorem lemma proposition corollary definition example remark note}
-.un_theorem *, .num_theorem *,
-.un_lemma *, .num_lemma *,
-.un_prop *, .num_prop *,
-.un_cor *, .num_cor * {font-style: italic}
-span.theorem_label {font-style:normal; font-weight:bold;}
-.proof span.theorem_label {font-style:italic;}
-.num_theorem .theorem_label:after {
-   content: " " counter(theorem); counter-increment: theorem;}
-.num_lemma .theorem_label:after {
-   content: " " counter(lemma); counter-increment: lemma;}
-.num_prop .theorem_label:after {
-   content: " " counter(proposition); counter-increment: proposition;}
-.num_cor .theorem_label:after {
-   content: " " counter(corollary); counter-increment: corollary;}
-.num_defn .theorem_label:after {
-   content: " " counter(definition); counter-increment: definition;}
-.num_example .theorem_label:after {
-   content: " " counter(example); counter-increment: example;}
-.num_remark .theorem_label:after {
-   content: " " counter(remark); counter-increment: remark;}
-.num_note .theorem_label:after {
-   content: " " counter(note); counter-increment: note;}
-
-/* Hack for Mozilla bug 449396 */
-[mathvariant="bold"] *  {
-  font-style: normal;
-  font-variant: normal;
-  font-weight: bold;
-}
-[mathvariant="italic"] *  {
-  font-style: italic;
-  font-variant: normal;
-  font-weight: normal;
-}
-[mathvariant="bold-italic"] *  {
-  font-style: italic;
-  font-variant: normal;
-  font-weight: bold;
-}
-[mathvariant="sans-serif"] *  {
-  font-style: normal;
-  font-variant: normal;
-  font-weight: normal;
-}
-[mathvariant="bold-sans-serif"] *  {
-  font-style: normal;
-  font-variant: normal;
-  font-weight: bold;
-}
-[mathvariant="sans-serif-italic"] *  {
-  font-style: italic;
-  font-variant: normal;
-  font-weight: normal;
-}
-[mathvariant="sans-serif-bold-italic"] *  {
-  font-style: italic;
-  font-variant: normal;
-  font-weight: bold;
-}
-[actiontype="toggle"]:hover {text-shadow: #ccc 2px 2px 5px;}

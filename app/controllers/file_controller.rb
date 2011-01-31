@@ -1,7 +1,7 @@
 # Controller responsible for serving files and pictures.
 
 require 'zip/zip'
-require 'stringsupport'
+require 'instiki_stringsupport'
 
 class FileController < ApplicationController
 
@@ -88,37 +88,28 @@ class FileController < ApplicationController
   protected
   
   def check_authorized
-    if authorized? or @web.published?
-      return true
-    else
+    unless authorized? or @web.published?
       @hide_navigation  = true
       render(:status => 403, :text => 'This web is private', :layout => true)
-      return false
     end    
   end
 
   def check_allow_uploads
-    render(:status => 404, :text => "Web #{params['web'].inspect} not found", :layout => 'error') and return false unless @web
-    if @web.allow_uploads? and authorized?
-      return true
+    if @web
+      if @web.allow_uploads? and authorized?
+        return true
+      else
+        @hide_navigation  = true
+        render(:status => 403, :text => 'File uploads are blocked by the webmaster', :layout => true)
+        return false
+      end
     else
-      @hide_navigation  = true
-      render(:status => 403, :text => 'File uploads are blocked by the webmaster', :layout => true)
-      return false
+      render(:status => 404, :text => "Web #{params['web'].inspect} not found", :layout => 'error')
     end
   end
   
   private 
   
-  def is_post
-    unless (request.post? || ENV["RAILS_ENV"] == "test")
-      headers['Allow'] = 'POST'
-      render(:status => 405, :text => 'You must use an HTTP POST', :layout => 'error')
-      return false
-    end
-    return true
-  end
-
   def import_from_archive(archive)
     logger.info "Importing pages from #{archive}"
     zip = Zip::ZipInputStream.open(archive)

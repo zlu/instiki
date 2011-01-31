@@ -208,9 +208,45 @@ END_THM
         %{<mi>sin</mi><mo stretchy='false'>(</mo><mi>x</mi><mo stretchy='false'>)</mo></math></p>},
         "ecuasi\303\263n $\\sin(x)$")
   
+    assert_markup_parsed_as(
+        %{<div class='maruku-equation'><math class='maruku-mathml' display='block' xmlns='http://w} +
+        %{ww.w3.org/1998/Math/MathML'><mo>⋅</mo><mi>p</mi></math><span class='maruku-eq-tex'><code} +
+        %{ style='display: none;'>\\cdot\np</code></span></div>},
+        "$$\\cdot\np$$")
+  
+  end
+
+  def test_ial_in_lists
+
+    assert_markup_parsed_as(
+    "<ul>\n<li>item 1</li>\n\n<li style='color: red;'>" +
+    "item 2</li>\n\n<li>item 3 continues here</li>\n</ul>",
+    "* item 1\n* {: style=\"color:red\"} item 2\n* item 3\n   continues here\n")
+    
+    assert_markup_parsed_as(
+    "<ol start='4'>\n<li>item 1</li>\n\n<li value='10'>" +
+    "item 2</li>\n\n<li>item 3 continues here</li>\n</ol>",
+    "1. item 1\n2. {: value=\"10\"} item 2\n13. item 3\n   continues here\n{: start=\"4\"}")
+
   end
   
   def test_have_latest_itex2mml  
+
+      assert_markup_parsed_as(
+        %{<p>equation <math class='maruku-mathml' displa} +
+        %{y='inline' xmlns='http://www.w3.org/1998/Math/} +
+        %{MathML'><mi>A</mi><mi>\342\200\246</mi><mo>\342\253\275</mo><mi>B</} +
+        %{mi></math></p>},
+        "equation $A\\dots\\sslash B$")
+
+      assert_markup_parsed_as(
+        %{<p>boxed equation <math class='maruku-mathml' } +
+        %{display='inline' xmlns='http://www.w3.org/1998} +
+        %{/Math/MathML'><menclose notation='box'><mrow><} +
+        %{menclose notation='updiagonalstrike'><mi>D</mi} +
+        %{></menclose><mi>\317\210</mi><mo>=</mo><mn>0</} +
+        %{mn></mrow></menclose></math></p>},
+        "boxed equation $\\boxed{\\slash{D}\\psi=0}$")
 
       assert_markup_parsed_as(
         %{<p>equation <math class='maruku-mathml' displa} +
@@ -328,11 +364,12 @@ END_THM
     assert_match_markup_parsed_as(re, textile_and_markdown)
     set_web_property :markup, :textile
     assert_markup_parsed_as(
-      "<p>Markdown heading<br/>================</p>\n\n\n\t<h2>Textile heading</h2>" +
-      "\n\n\n\t<p><strong>some</strong> <b>text</b> <em>with</em> <del>styles</del></p>" +
-      "\n\n\n\t<ul>\n\t<li>list 1</li>\n\t\t<li>list 2</li>\n\t</ul>",
+      "<p>Markdown heading<br/>\n====</p>\n<h2>Textile heading</h2>" +
+      "\n<p><strong>some</strong> <b>text</b> <em>with</em> <del>styles</del></p>" +
+      "\n<ul>\n\t<li>list 1</li>\n\t<li>list 2</li>\n</ul>",
       textile_and_markdown)
-    
+
+# Mixed Textile+Markdown markup not supported by RedCloth 4.x    
     set_web_property :markup, :mixed
     assert_markup_parsed_as(
       "<h1>Markdown heading</h1>\n\n\n\t<h2>Textile heading</h2>\n\n\n\t" +
@@ -340,7 +377,14 @@ END_THM
       "<ul>\n\t<li>list 1</li>\n\t\t<li>list 2</li>\n\t</ul>",
       textile_and_markdown)
   end
-  
+
+  def test_textile_pre
+    set_web_property :markup, :textile
+     assert_markup_parsed_as("<pre>\n<code>\n  a == 16\n</code>\n</pre>\n<p>foo bar" +
+       "<br/>\n<pre><br/>\n<code>\n  b == 16\n</code><br/>\n</pre></p>",
+     "<pre>\n<code>\n  a == 16\n</code>\n</pre>\nfoo bar\n<pre>\n<code>\n  b == 16\n</code>\n</pre>")
+  end
+
   def test_rdoc
     set_web_property :markup, :rdoc
   
@@ -431,7 +475,7 @@ END_THM
     set_web_property :markup, :textile
     assert_markup_parsed_as(
       "<p>$$<span class='newWikiWord'>foo<a href='../show/foo'>?" +
-      "</a></span>$$<br/>$<span class='newWikiWord'>foo<a " +
+      "</a></span>$$<br/>\n$<span class='newWikiWord'>foo<a " +
       "href='../show/foo'>?</a></span>$</p>",
       "$$[[foo]]$$\n$[[foo]]$")
   end
@@ -713,7 +757,36 @@ END_THM
     assert_equal WikiReference::INCLUDED_PAGE, references[0].link_type
   end
 
-  def test_references_creation_categories
+  def test_references_creation_redirects
+    new_page = @web.add_page('NewPage', '[[!redirects OtherPage]]',
+        Time.local(2004, 4, 4, 16, 50), 'AlexeyVerkhovsky', x_test_renderer)
+        
+    references = new_page.wiki_references(true)
+    assert_equal 1, references.size
+    assert_equal 'OtherPage', references[0].referenced_name
+    assert_equal WikiReference::REDIRECTED_PAGE, references[0].link_type
+  end
+
+   def test_references_creation_redirects_in_included_page
+    new_page = @web.add_page('NewPage', "[[!redirects OtherPage]]\ncategory: plants",
+        Time.local(2004, 4, 4, 16, 50), 'AlexeyVerkhovsky', x_test_renderer)
+    second_page = @web.add_page('SecondPage', '[[!include NewPage]]',
+        Time.local(2004, 4, 4, 16, 50), 'AlexeyVerkhovsky', x_test_renderer)
+        
+    references = new_page.wiki_references(true)
+    assert_equal 2, references.size
+    assert_equal 'OtherPage', references[0].referenced_name
+    assert_equal WikiReference::REDIRECTED_PAGE, references[0].link_type
+    assert_equal 'plants', references[1].referenced_name
+    assert_equal WikiReference::CATEGORY, references[1].link_type
+
+    references = second_page.wiki_references(true)
+    assert_equal 1, references.size
+    assert_equal 'NewPage', references[0].referenced_name
+    assert_equal WikiReference::INCLUDED_PAGE, references[0].link_type
+  end
+
+ def test_references_creation_categories
     new_page = @web.add_page('NewPage', "Foo\ncategory: NewPageCategory",
         Time.local(2004, 4, 4, 16, 50), 'AlexeyVerkhovsky', x_test_renderer)
 

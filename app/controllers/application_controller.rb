@@ -41,11 +41,9 @@ class ApplicationController < ActionController::Base
      s.scan( %r(\w{#{n},#{n}}) ).collect {|a| (a.hex * 2/3).to_s(16).rjust(n,'0')}.join
   end
 
-  def check_authorization
-    if in_a_web? and authorization_needed? and not authorized?
-      redirect_to :controller => 'wiki', :action => 'login', :web => @web_name
-      return false
-    end
+  def check_authorization    
+    redirect_to(:controller => 'wiki', :action => 'login',
+                :web => @web_name) if in_a_web? and authorization_needed? and not authorized?
   end
 
   def connect_to_model
@@ -55,10 +53,8 @@ class ApplicationController < ActionController::Base
     @author = cookies['author'] || 'AnonymousCoward'
     if @web_name
       @web = @wiki.webs[@web_name]
-      if @web.nil?
-        render(:status => 404, :text => "Unknown web '#{@web_name}'", :layout => 'error')
-        return false 
-      end
+      render(:status => 404, :text => "Unknown web '#{@web_name}'",
+             :layout => 'error') if @web.nil?
     end
   end
 
@@ -190,7 +186,7 @@ class ApplicationController < ActionController::Base
     response.charset = 'utf-8'
     if %w(atom_with_content atom_with_headlines).include?(action_name)
       response.content_type = Mime::ATOM
-    elsif %w(tex).include?(action_name)
+    elsif %w(tex tex_list).include?(action_name)
       response.content_type = Mime::TEXT
     elsif xhtml_enabled?
       if request.user_agent =~ /Validator/ or request.env.include?('HTTP_ACCEPT') &&
@@ -246,6 +242,16 @@ class ApplicationController < ActionController::Base
     (@web.published? and action_name == 's5')
   end
 
+  def is_post
+    unless (request.post? || Rails.env.test?)
+      layout = 'error'
+      layout = false if %w(tex tex_list).include?(action_name)
+      headers['Allow'] = 'POST'
+      render(:status => 405, :text => 'You must use an HTTP POST', :layout => layout)
+    end
+    return true
+  end
+
 end
 
 module Mime
@@ -271,9 +277,9 @@ module Instiki
   module VERSION #:nodoc:
     MAJOR = 0
     MINOR = 19
-    TINY  = 0 
+    TINY  = 1 
     SUFFIX = '(MML+)'
-    PRERELEASE =  'pre'
+    PRERELEASE =  false
     if PRERELEASE
        STRING = [MAJOR, MINOR].join('.') + PRERELEASE + SUFFIX
     else
@@ -285,4 +291,18 @@ end
 # Monkey patch, to make Hash#key work in Ruby 1.8
 class Hash
   alias_method(:key, :index) unless method_defined?(:key)
+end
+
+# Monkey patch, to ensure ActionCache doesn't muck with the content-type header.
+module ActionController #:nodoc:
+  module Caching
+    module Actions
+      class ActionCacheFilter
+        private
+          def set_content_type!(controller, extension)
+            return
+          end
+      end
+    end
+  end
 end

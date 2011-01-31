@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2004-2009 David Heinemeier Hansson
+# Copyright (c) 2004-2010 David Heinemeier Hansson
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -32,7 +32,7 @@ rescue LoadError
 end
 
 begin
-  gem 'rack', '~> 1.1.1'
+  gem 'rack', '~> 1.1.0'
   require 'rack'
 rescue Gem::LoadError
   $:.unshift "#{File.dirname(__FILE__)}/../../../plugins/rack/lib"

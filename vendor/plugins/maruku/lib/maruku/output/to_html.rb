@@ -74,9 +74,7 @@ module MaRuKu; module Out; module HTML
 			div.write(xml,indent,transitive=true,ie_hack)
 		end
 
-		xml.gsub!(/\A<dummy>\s*/,'')
-		xml.gsub!(/\s*<\/dummy>\Z/,'')
-		xml.gsub!(/\A<dummy\s*\/>/,'')
+		xml.gsub!(/\A<dummy>\s*|\s*<\/dummy>\Z|\A<dummy\s*\/>/,'')
 		xml
 	end
 	
@@ -389,7 +387,7 @@ It is copied as a standard HTML attribute.
 	
 	HTML4Attributes = {}
 	
-	coreattrs = [:id, :class, :style, :title]
+	coreattrs = [:id, :class, :style, :title, :accesskey, :contenteditable, :dir, :draggable, :spellcheck, :tabindex]
 	i18n = [:lang, 'xml:lang'.to_sym]
 	events = [
 		:onclick, :ondblclick, :onmousedown, :onmouseup, :onmouseover, 
@@ -410,7 +408,9 @@ It is copied as a standard HTML attribute.
 		[['pre'], attrs],
 		[['q', 'blockquote'], attrs+[:cite]],
 		[['ins','del'], attrs+[:cite,:datetime]],
-		[['ol','ul','li'], attrs],
+		[['ol'], attrs+[:reversed, :start]],
+		[['ul'], attrs],
+		[['li'], attrs+[:value]],
 		['table',attrs+[:summary, :width, :frame, :rules, :border, :cellspacing, :cellpadding]],
 		['caption',attrs],	
 		[['colgroup','col'],attrs+[:span, :width]+cellhalign+cellvalign],
@@ -505,8 +505,7 @@ by Maruku, to have the same results in both HTML and LaTeX.
 	def source2html(source)
 #		source = source.gsub(/&/,'&amp;')
 		source = Text.normalize(source)
-		source = source.gsub(/\&apos;/,'&#39;') # IE bug
-		source = source.gsub(/'/,'&#39;') # IE bug
+		source.gsub!(/\&apos;|'/,'&#39;') # IE bug
 		Text.new(source, true, nil, true )
 	end
 		
@@ -569,14 +568,13 @@ and
 				source = source.gsub(/\n*\Z/,'')
 				
 				html = convertor.convert( source )
-				html = html.gsub(/\&apos;/,'&#39;') # IE bug
-				html = html.gsub(/'/,'&#39;') # IE bug
+				html.gsub!(/\&apos;|'/,'&#39;') # IE bug
 	#			html = html.gsub(/&/,'&amp;') 
 				
 				code = Document.new(html, {:respect_whitespace =>:all}).root
 				code.name = 'code'
 				code.attributes['lang'] = lang
-							
+				
 				pre = Element.new 'pre'
 				pre.attributes['class'] = lang
 				pre << code
@@ -631,9 +629,7 @@ of the form `#ff00ff`.
 		s = source
 		
 #		s  = s.gsub(/&/,'&amp;')
-		s = Text.normalize(s)
-		s  = s.gsub(/\&apos;/,'&#39;') # IE bug
-		s  = s.gsub(/'/,'&#39;') # IE bug
+		s = Text.normalize(s).gsub(/\&apos;|'/,'&#39;') # IE bug
 
 		if get_setting(:code_show_spaces) 
 			# 187 = raquo
@@ -826,11 +822,11 @@ If true, raw HTML is discarded from the output.
 		else # invalid
 			# Creates red box with offending HTML
 			tell_user "Wrapping bad html in a PRE with class 'markdown-html-error'\n"+
-				add_tabs(raw_html,1,'|')
+				raw_html.gsub(/^/, '|')
 			pre = Element.new('pre')
 			pre.attributes['style'] = 'border: solid 3px red; background-color: pink'
 			pre.attributes['class'] = 'markdown-html-error'
-			pre << Text.new("HTML parse error: \n#{raw_html}", true)
+			pre << Text.new("REXML could not parse this XML/HTML: \n#{raw_html}", true)
 			return pre
 		end
 	end

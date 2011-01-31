@@ -26,7 +26,7 @@ Rails::Initializer.run do |config|
     File.open(secret_file, 'w', 0600) { |f| f.write(secret) }  
   end  
   config.action_controller.session = { 
-    :session_key => "instiki_session",
+    :key => "instiki_session",
     :secret => secret
    } 
 
@@ -58,8 +58,11 @@ end
 require_dependency 'instiki_errors'
 
 #require 'jcode'
+
+# Miscellaneous monkey patches (here be dragons ...)
 require 'caching_stuff'
 require 'logging_stuff'
+require 'rack_stuff'
 
 #Additional Mime-types 
 mime_types = YAML.load_file(File.join(File.dirname(__FILE__), 'mime_types.yml'))

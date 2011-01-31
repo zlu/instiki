@@ -1,5 +1,5 @@
 require 'chunks/chunk'
-require 'stringsupport'
+require 'instiki_stringsupport'
 
 # The category chunk looks for "category: news" on a line by
 # itself and parses the terms after the ':' as categories.
@@ -17,8 +17,8 @@ class Category < Chunk::Abstract
 
 def initialize(match_data, content)
     super(match_data, content)
+    @content = content
     @hidden = match_data[1]
-#    @list = match_data[2].split(',').map { |c| clean = c.purify; clean.strip.escapeHTML if clean }
     @list = match_data[2].split(',').map { |c| clean = c.purify.strip.escapeHTML; clean if clean != ''}
     @list.compact!
     @unmask_text = ''
@@ -32,6 +32,7 @@ def initialize(match_data, content)
 
   # TODO move presentation of page metadata to controller/view
   def url(category)
-    %{<a class="category_link" href="../list/#{category}">#{category}</a>}
+    %{<a class="category_link" href="#{@content.url_generator.url_for :web => @content.web.address,
+                    :action => 'list', :only_path => true}/#{CGI.escape(category)}">#{category}</a>}
   end
 end

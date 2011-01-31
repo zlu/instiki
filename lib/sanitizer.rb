@@ -7,18 +7,20 @@ module Sanitizer
 
   require 'action_controller/vendor/html-scanner/html/tokenizer'
   require 'node'
-  require 'stringsupport'
+  require 'instiki_stringsupport'
   require 'set'
 
-  acceptable_elements = Set.new %w[a abbr acronym address area audio b big blockquote br
-      button caption center cite code col colgroup dd del dfn dir div dl dt
-      em fieldset font form h1 h2 h3 h4 h5 h6 hr i img input ins kbd label
-      legend li map menu ol optgroup option p pre q s samp select small span
-      strike strong sub sup table tbody td textarea tfoot th thead tr tt u
-      ul var video]
+  acceptable_elements = Set.new %w[a abbr acronym address area article aside
+      audio b big blockquote br button canvas caption center cite code
+      col colgroup command datalist dd del details dfn dialog dir div dl dt
+      em fieldset figcaption figure font footer form h1 h2 h3 h4 h5 h6 header
+      hgroup hr i img input ins kbd label legend li map mark menu meter nav
+      ol optgroup option p pre progress q rp rt ruby s samp section select small
+      source span strike strong sub summary sup table tbody td textarea tfoot
+      th thead time tr tt u ul var video wbr]
       
-  mathml_elements = Set.new %w[annotation annotation-xml maction math merror mfrac
-      mfenced mi mmultiscripts mn mo mover mpadded mphantom mprescripts mroot
+  mathml_elements = Set.new %w[annotation annotation-xml maction math menclose merror
+      mfrac mfenced mi mmultiscripts mn mo mover mpadded mphantom mprescripts mroot
       mrow mspace msqrt mstyle msub msubsup msup mtable mtd mtext mtr munder
       munderover none semantics]
       
@@ -29,19 +31,21 @@ module Sanitizer
       polyline radialGradient rect set stop svg switch text textPath title tspan use]
       
   acceptable_attributes = Set.new %w[abbr accept accept-charset accesskey action
-      align alt axis border cellpadding cellspacing char charoff charset
-      checked cite class clear cols colspan color compact controls coords datetime
-      dir disabled enctype for frame headers height href hreflang hspace id
-      ismap label lang longdesc loop maxlength media method multiple name nohref
-      noshade nowrap poster prompt readonly rel rev rows rowspan rules scope
-      selected shape size span src start style summary tabindex target title
-      type usemap valign value vspace width xml:lang]
+      align alt autocomplete axis bgcolor border cellpadding cellspacing char charoff
+      checked cite class clear cols colspan color compact contenteditable contextmenu
+      controls coords datetime dir disabled draggable enctype face for formaction frame
+      headers height high href hreflang hspace icon id ismap label list lang longdesc
+      loop low max maxlength media method min multiple name nohref noshade nowrap open
+      optimumpattern placeholder poster preload pubdate radiogroup readonly rel
+      required rev reversed rows rowspan rules spellcheck scope
+      selected shape size span src start step style summary tabindex target title
+      type usemap valign value vspace width wrap xml:lang]
 
   mathml_attributes = Set.new %w[actiontype align close
       columnalign columnlines columnspacing columnspan depth display
       displaystyle encoding equalcolumns equalrows fence fontstyle fontweight
       frame height linethickness lspace mathbackground mathcolor mathvariant
-      maxsize minsize open other rowalign
+      maxsize minsize notation open other rowalign
       rowlines rowspacing rowspan rspace scriptlevel selection separator
       separators stretchy width xlink:href xlink:show xlink:type xmlns
       xmlns:xlink]
@@ -72,7 +76,7 @@ module Sanitizer
        xlink:arcrole xlink:href xlink:role xlink:show xlink:title xlink:type
        xml:base xml:lang xml:space xmlns xmlns:xlink xmlns:se y y1 y2 zoomAndPan]
        
-  attr_val_is_uri = Set.new %w[href src cite action longdesc xlink:href xml:base]
+  attr_val_is_uri = Set.new %w[href src cite action formaction longdesc xlink:href xml:base]
   
   svg_attr_val_allows_ref = Set.new %w[clip-path color-profile cursor fill
       filter marker marker-start marker-mid marker-end mask stroke]

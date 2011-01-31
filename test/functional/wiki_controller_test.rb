@@ -10,7 +10,7 @@ require 'wiki_controller'
 require 'rexml/document'
 require 'tempfile'
 require 'zip/zipfilesystem'
-require 'stringsupport'
+require 'instiki_stringsupport'
 
 # Raise errors beyond the default web-based presentation
 class WikiController; def rescue_action(e) logger.error(e); raise e end; end
@@ -142,6 +142,8 @@ class WikiControllerTest < ActionController::TestCase
     
     # Tempfile doesn't know how to open files with binary flag, hence the two-step process
     Tempfile.open('instiki_export_file') { |f| @tempfile_path = f.path }
+    # some wacky bug in Ruby 1.9.2p0's Tempfile is fixed by
+    @tempfile_path.to_s
     begin 
       File.open(@tempfile_path, 'wb') { |f| f.write(r.body); @exported_file = f.path }
       Zip::ZipFile.open(@exported_file) do |zip| 
@@ -346,13 +348,13 @@ class WikiControllerTest < ActionController::TestCase
     
     assert_response(:success)
     assert_equal @home, r.template_objects['page']
-    assert_match /<a class='existingWikiWord' href='\/wiki1\/published\/ThatWay'>That Way<\/a>/, r.body
+    assert_match /<a class='existingWikiWord' href='\/wiki1\/published\/ThatWay'>That Way<\/a>/, r.body.as_bytes
 
     r = process('show', 'web' => 'wiki1', 'id' => 'HomePage')
     
     assert_response(:success)
     assert_equal @home, r.template_objects['page']
-    assert_match /<a class='existingWikiWord' href='\/wiki1\/show\/ThatWay'>That Way<\/a>/, r.body
+    assert_match /<a class='existingWikiWord' href='\/wiki1\/show\/ThatWay'>That Way<\/a>/, r.body.as_bytes
 
     r = process 'save', 'web' => 'instiki', 'id' => 'HomePage', 'content' => 'Contents of a new page', 
       'author' => 'AuthorOfNewPage'
@@ -955,13 +957,13 @@ class WikiControllerTest < ActionController::TestCase
   end
 
   def test_recursive_include
-    @wiki.write_page('wiki1', 'HomePage', 'Self-include: [[!include HomePage]]', Time.now, 
+    @wiki.write_page('wiki1', 'HomePage', "Self-include:\n\n [[!include HomePage]] ", Time.now, 
         Author.new('AnotherAuthor', '127.0.0.2'), x_test_renderer)
 
     r = process('show', 'id' => 'HomePage', 'web' => 'wiki1')
 
     assert_response :success
-    assert_match /<em>Recursive include detected: HomePage \342\206\222 HomePage<\/em>/, r.body
+    assert_match /<em>Recursive include detected: HomePage \342\206\222 HomePage<\/em>/, r.body.as_utf8
   end
 
   def test_recursive_include_II
@@ -973,7 +975,7 @@ class WikiControllerTest < ActionController::TestCase
     r = process('show', 'id' => 'HomePage', 'web' => 'wiki1')
 
     assert_response :success
-    assert_match /<p>Recursive-include:<\/p>\n\n<p>extra fun <em>Recursive include detected: Foo \342\206\222 Foo<\/em><\/p>/, r.body
+    assert_match /<p>Recursive-include:<\/p>\n\n<p>extra fun <em>Recursive include detected: Foo \342\206\222 Foo<\/em><\/p>/, r.body.as_utf8
   end
   
   def test_recursive_include_III
@@ -987,7 +989,7 @@ class WikiControllerTest < ActionController::TestCase
     r = process('show', 'id' => 'HomePage', 'web' => 'wiki1')
 
     assert_response :success
-    assert_match /<p>Recursive-include:<\/p>\n\n<p>extra fun<\/p>\n<em>Recursive include detected: Bar \342\206\222 Bar<\/em>/, r.body
+    assert_match /<p>Recursive-include:<\/p>\n\n<p>extra fun<\/p>\n<em>Recursive include detected: Bar \342\206\222 Bar<\/em>/, r.body.as_utf8
   end
 
   def test_nonrecursive_include
@@ -1002,6 +1004,32 @@ class WikiControllerTest < ActionController::TestCase
 
     assert_response :success
     assert_match /<p>Nonrecursive-include:<\/p>\n\n<p>extra fun<\/p>\n\n<p><a class='existingWikiWord' href='\/wiki1\/show\/HomePage'>HomePage<\/a><\/p>/, r.body
+  end
+  
+  def test_divref
+    @wiki.write_page('wiki1', 'Bar',  "+-- \{: .num_lemma #Leftcosetsdisjoint\}\n###### Lem" +
+      "ma\nLet $H$ be a subgroup of a group $G$, and let $x$ and $y$ be elements\n of $G$" +
+      ". Suppose that $x H \\cap y H$ is non-empty. Then $x H = y H$.\n=--\n\n See Lemma \\" +
+      "ref\{Leftcosetsdisjoint\}.", Time.now, 
+        Author.new('AnotherAuthor', '127.0.0.2'), x_test_renderer)
+
+    r = process('show', 'id' => 'Bar', 'web' => 'wiki1')
+
+    assert_response :success
+    resp = %{<div class='num_lemma' id='Leftcosetsdisjoint'>\n<h6 id='lemma_1'>Lemma</h6>\n\n} +
+      %{<p>Let <math class='maruku-mathml' display='inline' xmlns='http://www.w3.org/1998/Mat} +
+      %{h/MathML'><mi>H</mi></math> be a subgroup of a group <math class='maruku-mathml' displ} +
+      %{ay='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>G</mi></math>, and let <ma} +
+      %{th class='maruku-mathml' display='inline' xmlns='http://www.w3.org/1998/Math/MathML'>} +
+      %{<mi>x</mi></math> and <math class='maruku-mathml' display='inline' xmlns='http://www.} +
+      %{w3.org/1998/Math/MathML'><mi>y</mi></math> be elements of <math class='maruku-mathml'} +
+      %{ display='inline' xmlns='http://www.w3.org/1998/Math/MathML'><mi>G</mi></math>. Suppo} +
+      %{se that <math class='maruku-mathml' display='inline' xmlns='http://www.w3.org/1998/Ma} +
+      %{th/MathML'><mi>x</mi><mi>H</mi><mo>\342\210\251</mo><mi>y</mi><mi>H</mi></math> is no} +
+      %{n-empty. Then <math class='maruku-mathml' display='inline' xmlns='http://www.w3.org/1} +
+      %{998/Math/MathML'><mi>x</mi><mi>H</mi><mo>=</mo><mi>y</mi><mi>H</mi></math>.</p>\n</di} +
+      %{v>\n\n<p>See Lemma <a class='maruku-ref' href='#Leftcosetsdisjoint'>1</a>.</p>}
+    assert_match Regexp.new(resp), r.body
   end
   
   def test_show_page_nonexistant_page
@@ -1041,7 +1069,7 @@ class WikiControllerTest < ActionController::TestCase
 %
 %  \color{} with HTML colorspec
 %  \bgcolor
-%  \array
+%  \array with options (without options, it's equivalent to the matrix environment)
 
 % Of the standard HTML named colors, white, black, red, green, blue and yellow
 % are predefined in the color package. Here are the rest.
@@ -1115,6 +1143,7 @@ class WikiControllerTest < ActionController::TestCase
 % Renames \sqrt as \oldsqrt and redefine root to result in \sqrt[#1]{#2}
 \let\oldroot\root
 \def\root#1#2{\oldroot #1 \of{#2}}
+\renewcommand{\sqrt}[2][]{\oldroot #1 \of{#2}}
 
 % Manually declare the txfonts symbolsC font
 \DeclareSymbolFont{symbolsC}{U}{txsyc}{m}{n}
@@ -1170,6 +1199,9 @@ class WikiControllerTest < ActionController::TestCase
 \raise7\p@\vbox{\kern7\p@\hbox{.}}\mkern1mu}}
 \makeatother
 
+%% Fix array
+\newcommand{\itexarray}[1]{\begin{matrix}#1\end{matrix}}
+
 %% Renaming existing commands
 \newcommand{\underoverset}[3]{\underset{#1}{\overset{#2}{#3}}}
 \newcommand{\widevec}{\overrightarrow}
@@ -1217,7 +1249,6 @@ class WikiControllerTest < ActionController::TestCase
 \newcommand{\conint}{\oint}
 \newcommand{\contourintegral}{\oint}
 \newcommand{\infinity}{\infty}
-\renewcommand{\empty}{\emptyset}
 \newcommand{\bottom}{\bot}
 \newcommand{\minusb}{\boxminus}
 \newcommand{\plusb}{\boxplus}
@@ -1312,6 +1343,28 @@ Page2 contents $\mathbb{01234}$.
 
 \end{document}
 !, r.body
+  end
+
+  def test_tex_list
+    @wiki.write_page('wiki1', "Ch\303\242timent & Page",
+        "Page2 contents $\\mathbb{01234}$.\n",
+        Time.now, Author.new('AnotherAuthor', '127.0.0.2'), x_test_renderer)
+    @request.env['RAW_POST_DATA'] = "_form_key=353106ff8c8466727ee5338baaa0640c87c9b0d6&Ch%C3%A2timent+%26+Page=tex&BogusPage=tex&HomePage=tex&commit=Export"
+    r = process('tex_list', 'web' => 'wiki1', 'Page2' => 'tex', 'BogusPage'=> 'tex', 'HomePage' => 'tex')
+    assert_response(:success)
+    assert_equal @tex_header1 + "\\usepackage{mathbbol}\n" + @tex_header2 + %q!\section*{Châtiment \\& Page}
+
+Page2 contents $\mathbb{01234}$.
+
+\section*{HomePage}
+
+HisWay would be MyWay $\sin(x) \includegraphics[width=3em]{foo}$ in kinda ThatWay in HisWay though MyWay $\backslash$OverThere --{} see SmartEngine in that SmartEngineGUI
+
+
+
+
+\end{document}
+!, r.body  
   end
 
   def test_web_list

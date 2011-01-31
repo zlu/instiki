@@ -7,7 +7,7 @@ require_dependency 'chunks/wiki'
 require_dependency 'chunks/literal'
 require 'chunks/nowiki'
 require 'sanitizer'
-require 'stringsupport'
+require 'instiki_stringsupport'
 
 
 # Wiki content is just a string that can process itself with a chain of
@@ -115,7 +115,7 @@ class WikiContentStub < String
   end
 end
 
-class WikiContent < String
+class WikiContent < ActiveSupport::SafeBuffer
 
   include ChunkManager
   include Sanitizer
@@ -128,7 +128,7 @@ class WikiContent < String
     :mode                => :show
   }.freeze
 
-  attr_reader :web, :options, :revision, :not_rendered, :pre_rendered
+  attr_reader :web, :options, :revision, :not_rendered, :pre_rendered, :url_generator
 
   # Create a new wiki content string from the given one.
   # The options are explained at the top of this file.
@@ -181,8 +181,18 @@ class WikiContent < String
     @options[:engine].apply_to(copy)
 
     copy.inside_chunks(@options[:hide_chunks]) do |id|
-      @chunks_by_id[id.to_i].revert
+      @chunks_by_id[id.to_i].revert if @chunks_by_id[id.to_i]
     end
+  end
+
+  def delete_chunks!(types)
+    types.each do |t|
+      @chunks_by_type[t].each do |c|
+        @pre_rendered.sub!(c.mask, '') if @pre_rendered
+        @chunks.delete(c)
+      end
+    end
+    self
   end
 
   def pre_render!
@@ -209,6 +219,7 @@ class WikiContent < String
       end
     end
     self.replace xhtml_sanitize(self)
+    self.html_safe
   end
 
   def page_name

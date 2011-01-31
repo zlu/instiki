@@ -113,9 +113,64 @@ pre {
 }
 
 ol.setup {
+<<<<<<< HEAD:public/stylesheets/instiki.css
   font-size: 19px;
   font-family: georgia, verdana;
   padding-left: 25px;
+=======
+font-family:georgia, verdana, sans-serif;
+font-size:110%;
+margin-top:1em;
+padding-left:1.5em;
+}
+
+.byline {
+color:#666;
+font-size:.8em;
+font-style:italic;
+margin-bottom:1em;
+padding-top:1px;
+}
+
+p.show_diff {
+background: #eee;
+padding: 3px;
+border: 1px solid silver;
+font-size:.85em;
+}
+
+span.webName {
+font-size:.5em;
+}
+
+span.views, span.linked {
+font-size:.85em;
+}
+.views a, .linked a {
+font-weight: normal
+}
+span.revisions {
+font-size:.95em
+}
+
+#allPages, #wantedPages {
+float: left;
+width: 280px;
+}
+#allPages {
+margin-right: 30px;
+}
+#allPages h2, #wantedPages h2 {
+font-size: 1.2em;
+}
+#allPages label {
+font-size: .8em;
+}
+
+.pageType {
+font-size: .75em;
+font-style: italic;
+>>>>>>> c61eb7ae1e75509bdccaf741f1ae9846086ad351:public/stylesheets/instiki.css
 }
 
 ol.setup li {
@@ -225,8 +280,42 @@ div.personal {
     clear:both;
 }
 
+<<<<<<< HEAD:public/stylesheets/instiki.css
 ins {
     display:none;
+=======
+ul#sortable_pages {
+list-style-type:none;
+padding-left:0;
+}
+ul#sortable_pages li {
+border: 1px solid #FFF;
+}
+ul#sortable_pages li:hover, ul#sortable_pages li:focus {
+border: 1px solid blue;
+}
+
+merror {display:inline;font-size:1em;}
+math[display=block] {overflow:auto;}
+math { white-space: nowrap }
+.maruku-eq-number {float:right}
+.maruku-equation {text-align:center}
+.blockquotesource {margin-left:1em;}
+fieldset.search {display:inline; border:none;padding:0;margin:0;top:5px;position:relative;}
+span.keyboard {
+ background: #CCC;
+ color: #000;
+ border: outset 2px;
+ font-family:verdana, arial, sans-serif;
+ font-size: .7em;
+ margin-left:5px;
+ padding:1px 2px;
+}
+.centeredfigure {
+ position:relative;
+ margin:auto;
+ text-align:center;
+>>>>>>> c61eb7ae1e75509bdccaf741f1ae9846086ad351:public/stylesheets/instiki.css
 }
 
 .fieldset {

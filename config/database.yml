@@ -1,60 +1,15 @@
-
-# "Out of the box", Instiki stores it's data in sqlite3 database. Other options are listed below.
-
-development:
-    adapter: sqlite3
-    database: db/development.db.sqlite3
-
-test:
-    adapter: sqlite3
-    database: db/test.db.sqlite3
-
 production:
-  adapter: sqlite3
-  database: db/production.db.sqlite3
-  
-# MySQL (default setup).  Versions 4.1 and 5.0 are recommended.
-#
-# Install the MySQL driver:
-#   gem install mysql
-# On MacOS X:
-#   gem install mysql -- --include=/usr/local/lib
-# On Windows:
-#   There is no gem for Windows.  Install mysql.so from RubyForApache.
-#   http://rubyforge.org/projects/rubyforapache
-#
-# And be sure to use new-style password hashing:
-#   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
-
-
-# Get the fast C bindings:
-#   gem install mysql
-#   (on OS X: gem install mysql -- --include=/usr/local/lib)
-# And be sure to use new-style password hashing:
-#   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
-
-mysql_example:
   adapter: mysql
-  database: instiki_development
+  database: instiki_production
   username: root
-  password:
-  socket: /path/to/your/mysql.sock
+  password: flute
+  socket: /var/run/mysqld/mysqld.sock
 
 # Connect on a TCP socket.  If omitted, the adapter will connect on the
 # domain socket given by socket instead.
 #host: localhost
 #port: 3306
   
-# Warning: The database defined as 'test' will be erased and
-# re-generated from your development database when you run 'rake'.
-# Do not set this db to the same as development or production.
-mysql_example:
-  adapter: mysql
-  database: instiki_test
-  username: root
-  password:
-  socket: /path/to/your/mysql.sock
-
 # PostgreSQL versions 7.4 - 8.2
 #
 # Get the C bindings:

@@ -1,0 +1,26 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    RedCloth (4.2.3)
+    abstract (1.0.0)
+    erubis (2.6.6)
+      abstract (>= 1.0.0)
+    itextomml (1.4.5)
+    json (1.5.1)
+    mysql (2.8.1)
+    nokogiri (1.4.4)
+    rake (0.8.7)
+    rubyzip (0.9.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  RedCloth (>= 4.0.0)
+  erubis
+  itextomml (>= 1.4.5)
+  json
+  mysql
+  nokogiri
+  rake
+  rubyzip

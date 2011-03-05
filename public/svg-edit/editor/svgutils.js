@@ -9,15 +9,12 @@
 
 // Dependencies:
 // 1) jQuery
-// 2) browsersupport.js
-// 3) svgtransformlist.js
-// 4) math.js
+// 2) browser.js: only for getBBox()
+// 3) svgtransformlist.js: only for getRotationAngle()
+
+var svgedit = svgedit || {};
 
 (function() {
-
-if (!window.svgedit) {
-	window.svgedit = {};
-}
 
 if (!svgedit.utilities) {
 	svgedit.utilities = {};
@@ -26,13 +23,20 @@ if (!svgedit.utilities) {
 // Constants
 
 // String used to encode base64.
-var KEYSTR = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-var XLINKNS = "http://www.w3.org/1999/xlink";
+var KEYSTR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+var SVGNS = 'http://www.w3.org/2000/svg';
+var XLINKNS = 'http://www.w3.org/1999/xlink';
 
 // Much faster than running getBBox() every time
 var visElems = 'a,circle,ellipse,foreignObject,g,image,line,path,polygon,polyline,rect,svg,text,tspan,use';
 var visElems_arr = visElems.split(',');
 //var hidElems = 'clipPath,defs,desc,feGaussianBlur,filter,linearGradient,marker,mask,metadata,pattern,radialGradient,stop,switch,symbol,title,textPath';
+
+var editorContext_ = null;
+
+svgedit.utilities.init = function(editorContext) {
+	editorContext_ = editorContext;
+};
 
 // Function: svgedit.utilities.toXml
 // Converts characters in a string to XML-friendly entities.
@@ -60,7 +64,6 @@ svgedit.utilities.toXml = function(str) {
 svgedit.utilities.fromXml = function(str) {
 	return $('<p/>').html(str).text();
 };
-
 
 // This code was written by Tyler Akins and has been placed in the
 // public domain.  It would be nice if you left this header intact.
@@ -183,7 +186,7 @@ svgedit.utilities.convertToXMLReferences = function(input) {
 	return output;
 };
 
-// Function: text2xml
+// Function: svgedit.utilities.text2xml
 // Cross-browser compatible method of converting a string to an XML tree
 // found this function here: http://groups.google.com/group/jquery-dev/browse_thread/thread/c6d11387c580a77f
 svgedit.utilities.text2xml = function(sXML) {
@@ -206,7 +209,7 @@ svgedit.utilities.text2xml = function(sXML) {
 	return out;
 };
 
-// Function: bboxToObj
+// Function: svgedit.utilities.bboxToObj
 // Converts a SVGRect into an object.
 // 
 // Parameters:
@@ -223,7 +226,7 @@ svgedit.utilities.bboxToObj = function(bbox) {
 	}
 };
 
-// Function: walkTree
+// Function: svgedit.utilities.walkTree
 // Walks the tree and executes the callback on each element in a top-down fashion
 //
 // Parameters:
@@ -239,7 +242,7 @@ svgedit.utilities.walkTree = function(elem, cbFn){
 	}
 };
 
-// Function: walkTreePost
+// Function: svgedit.utilities.walkTreePost
 // Walks the tree and executes the callback on each element in a depth-first fashion
 // TODO: FIXME: Shouldn't this be calling walkTreePost?
 //
@@ -304,14 +307,14 @@ svgedit.utilities.setHref = function(elem, val) {
 // Returns:
 // The document's <defs> element, create it first if necessary
 svgedit.utilities.findDefs = function(svgElement) {
-	var svgElement = svgDoc.documentElement;
-	var defs = svgElement.getElementsByTagNameNS(svgns, "defs");
+	var svgElement = editorContext_.getSVGContent().documentElement;
+	var defs = svgElement.getElementsByTagNameNS(SVGNS, "defs");
 	if (defs.length > 0) {
 		defs = defs[0];
 	}
 	else {
 		// first child is a comment, so call nextSibling
-		defs = svgElement.insertBefore( svgElement.ownerDocument.createElementNS(svgns, "defs" ), svgElement.firstChild.nextSibling);
+		defs = svgElement.insertBefore( svgElement.ownerDocument.createElementNS(SVGNS, "defs" ), svgElement.firstChild.nextSibling);
 	}
 	return defs;
 };
@@ -406,7 +409,7 @@ svgedit.utilities.getPathBBox = function(path) {
 // Parameters:
 // elem - Optional DOM element to get the BBox for
 svgedit.utilities.getBBox = function(elem) {
-	var selected = elem || selectedElements[0];
+	var selected = elem || editorContext_.geSelectedElements()[0];
 	if (elem.nodeType != 1) return null;
 	var ret = null;
 	var elname = selected.nodeName;
@@ -415,9 +418,9 @@ svgedit.utilities.getBBox = function(elem) {
 		selected.textContent = 'a'; // Some character needed for the selector to use.
 		ret = selected.getBBox();
 		selected.textContent = '';
-	} else if(elname === 'path' && svgedit.browsersupport.isWebkit()) {
+	} else if(elname === 'path' && !svgedit.browser.supportsPathBBox()) {
 		ret = svgedit.utilities.getPathBBox(selected);
-	} else if(elname === 'use' && !svgedit.browsersupport.isWebkit() || elname === 'foreignObject') {
+	} else if(elname === 'use' && !svgedit.browser.isWebkit() || elname === 'foreignObject') {
 		ret = selected.getBBox();
 		var bb = {};
 		bb.width = ret.width;
@@ -459,7 +462,7 @@ svgedit.utilities.getBBox = function(elem) {
 // Returns:
 // Float with the angle in degrees or radians
 svgedit.utilities.getRotationAngle = function(elem, to_rad) {
-	var selected = elem || selectedElements[0];
+	var selected = elem || editorContext_.getSelectedElements()[0];
 	// find the rotation transform (if any) and set it
 	var tlist = svgedit.transformlist.getTransformList(selected);
 	if(!tlist) return 0; // <svg> elements have no tlist

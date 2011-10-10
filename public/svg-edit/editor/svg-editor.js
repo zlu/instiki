@@ -42,7 +42,7 @@
 					opacity: 1
 				},
 				initStroke: {
-					width: 5,
+					width: 2,
 					color: '000000',  // solid black
 					opacity: 1
 				},
@@ -915,11 +915,14 @@
 					
 					var timer;
 					
+					var pos = $(show_sel).position();
+					$(hold_sel).css({'left': pos.left+34, 'top': pos.top+77});
+					
 					// Clicking the "show" icon should set the current mode
 					shower.mousedown(function(evt) {
 						if(shower.hasClass('disabled')) return false;
-						var holder = $(show_sel.replace('_show',''));
-						var l = holder[0].style.left;
+						var holder = $(hold_sel);
+						var l = pos.left+34;
 						var w = holder.width()*-1;
 						var time = holder.data('shown_popop')?200:0;
 						timer = setTimeout(function() {
@@ -948,9 +951,6 @@
 					});
 					
 					// 	$('#tools_rect').mouseleave(function(){$('#tools_rect').fadeOut();});
-					
-					var pos = $(show_sel).position();
-					$(hold_sel).css({'left': pos.left+34, 'top': pos.top+77});
 				});
 				
 				setFlyoutTitles();
@@ -1509,9 +1509,9 @@
 							if(svgCanvas.getHref(elem).indexOf('data:') !== 0) {
 								promptImgURL();
 							}
-						} else if(elname == 'text') {
+						} /*else if(elname == 'text') {
 							// TODO: Do something here for new text
-						}
+						}*/
 					}
 					
 					if(!is_node && currentMode != 'pathedit') {
@@ -1887,6 +1887,10 @@
 				}
 			});
 		
+			$('#g_title').change(function() {
+				svgCanvas.setGroupTitle(this.value);
+			});
+		
 			$('.attr_changer').change(function() {
 				var attr = this.getAttribute("data-attr");
 				var val = this.value;
@@ -1898,15 +1902,17 @@
 					return false;
 				}
 				
-				if(isNaN(val)) {
-					val = svgCanvas.convertToNum(attr, val);
-				} else if(curConfig.baseUnit !== 'px') {
-					// Convert unitless value to one with given unit
+				if (attr !== "id") {
+					if (isNaN(val)) {
+						val = svgCanvas.convertToNum(attr, val);
+					} else if(curConfig.baseUnit !== 'px') {
+						// Convert unitless value to one with given unit
 				
-					var unitData = svgedit.units.getTypeMap();
+						var unitData = svgedit.units.getTypeMap();
 
-					if(selectedElement[attr] || svgCanvas.getMode() === "pathedit" || attr === "x" || attr === "y") {
-						val *= unitData[curConfig.baseUnit];
+						if(selectedElement[attr] || svgCanvas.getMode() === "pathedit" || attr === "x" || attr === "y") {
+							val *= unitData[curConfig.baseUnit];
+						}
 					}
 				}
 				
@@ -1965,9 +1971,11 @@
 			$("#toggle_stroke_tools").toggle(function() {
 				$(".stroke_tool").css('display','table-cell');
 				$(this).text('<<');
+				resetScrollPos();
 			}, function() {
 				$(".stroke_tool").css('display','none');
 				$(this).text('>>');
+				resetScrollPos();
 			});
 		
 			// This is a common function used when a tool has been clicked (chosen)
@@ -2129,7 +2137,9 @@
 			// Made public for UI customization.
 			// TODO: Group UI functions into a public svgEditor.ui interface.
 			Editor.addDropDown = function(elem, callback, dropUp) {
+				if ($(elem).length == 0) return; // Quit if called on non-existant element
 				var button = $(elem).find('button');
+				
 				var list = $(elem).find('ul').attr('id', $(elem)[0].id + '-list');
 				
 				if(!dropUp) {
@@ -3195,7 +3205,7 @@
 				} else if (preferences) {
 					hidePreferences();
 				}
-		
+				resetScrollPos();
 			};
 		
 			var hideSourceEditor = function(){
@@ -3219,6 +3229,42 @@
 
 			var win_wh = {width:$(window).width(), height:$(window).height()};
 			
+			var resetScrollPos = $.noop, curScrollPos;
+			
+			// Fix for Issue 781: Drawing area jumps to top-left corner on window resize (IE9)
+			if(svgedit.browser.isIE()) {
+				(function() {
+					resetScrollPos = function() {
+						if(workarea[0].scrollLeft === 0 
+						&& workarea[0].scrollTop === 0) {
+							workarea[0].scrollLeft = curScrollPos.left;
+							workarea[0].scrollTop = curScrollPos.top;
+						}
+					}
+				
+					curScrollPos = {
+						left: workarea[0].scrollLeft,
+						top: workarea[0].scrollTop
+					};
+					
+					$(window).resize(resetScrollPos);
+					svgEditor.ready(function() {
+						// TODO: Find better way to detect when to do this to minimize
+						// flickering effect
+						setTimeout(function() {
+							resetScrollPos();
+						}, 500);
+					});
+					
+					workarea.scroll(function() {
+						curScrollPos = {
+							left: workarea[0].scrollLeft,
+							top: workarea[0].scrollTop
+						};
+					});
+				}());
+			}
+			
 			$(window).resize(function(evt) {
 				if (editingsource) {
 					properlySourceSizeTextArea();
@@ -3233,8 +3279,13 @@
 			
 			(function() {
 				workarea.scroll(function() {
-					$('#ruler_x')[0].scrollLeft = workarea[0].scrollLeft;
-					$('#ruler_y')[0].scrollTop = workarea[0].scrollTop;
+					// TODO:  jQuery's scrollLeft/Top() wouldn't require a null check
+					if ($('#ruler_x').length != 0) {
+						$('#ruler_x')[0].scrollLeft = workarea[0].scrollLeft;
+					}
+					if ($('#ruler_y').length != 0) {
+						$('#ruler_y')[0].scrollTop = workarea[0].scrollTop;	
+					}
 				});
 
 			}());
@@ -3436,7 +3487,15 @@
 					if(!selectedElement) return;
 					var type = this.type;
 					
-					if(selectedElement.tagName === 'g') {
+					switch ( selectedElement.tagName ) {
+					case 'use':
+					case 'image':
+					case 'foreignObject':
+						// These elements don't have fill or stroke, so don't change 
+						// the current value
+						return;
+					case 'g':
+					case 'a':
 						var gPaint = null;
 					
 						var childs = selectedElement.getElementsByTagName('*');
@@ -3458,8 +3517,8 @@
 						var paintColor = gPaint;
 						
 						var paintOpacity = 1;
-
-					} else {
+						break;
+					default:
 						var paintOpacity = parseFloat(selectedElement.getAttribute(type + "-opacity"));
 						if (isNaN(paintOpacity)) {
 							paintOpacity = 1.0;
@@ -3942,7 +4001,7 @@
 					{sel:'#tool_source_cancel,#svg_source_overlay,#tool_docprops_cancel,#tool_prefs_cancel', fn: cancelOverlays, evt: 'click', key: ['esc', false, false], hidekey: true},
 					{sel:'#tool_source_save', fn: saveSourceEditor, evt: 'click'},
 					{sel:'#tool_docprops_save', fn: saveDocProperties, evt: 'click'},
-					{sel:'#tool_docprops', fn: showDocProperties, evt: 'mouseup', key: ['D', true]},
+					{sel:'#tool_docprops', fn: showDocProperties, evt: 'mouseup'},
 					{sel:'#tool_prefs_save', fn: savePreferences, evt: 'click'},
 					{sel:'#tool_prefs_option', fn: function() {showPreferences();return false}, evt: 'mouseup'},
 					{sel:'#tool_delete,#tool_delete_multi', fn: deleteSelected, evt: 'click', key: ['del/backspace', true]},
@@ -4175,8 +4234,11 @@
 				}
 				
 				$('#rulers').toggle(!!curConfig.showRulers);
-				$('#show_rulers')[0].checked = curConfig.showRulers;
 				
+				if (curConfig.showRulers) {
+					$('#show_rulers')[0].checked = true;	
+				}
+
 				if(curConfig.gridSnapping) {
 					$('#grid_snapping_on')[0].checked = true;
 				}
@@ -4196,7 +4258,9 @@
 			$('#font_size').SpinButton({ step: 1, min: 0.001, stepfunc: stepFontSize, callback: changeFontSize });
 			$('#group_opacity').SpinButton({ step: 5, min: 0, max: 100, callback: changeOpacity });
 			$('#blur').SpinButton({ step: .1, min: 0, max: 10, callback: changeBlur });
-			$('#zoom').SpinButton({ min: 0.001, max: 10000, step: 50, stepfunc: stepZoom, callback: changeZoom });
+			$('#zoom').SpinButton({ min: 0.001, max: 10000, step: 50, stepfunc: stepZoom, callback: changeZoom })
+				// Set default zoom 
+				.val(svgCanvas.getZoom() * 100);
 			
 			$("#workarea").contextMenu({
 					menu: 'cmenu_canvas',
@@ -4583,7 +4647,7 @@
 				updateCanvas(true);
 // 			});
 			
-		//	var revnums = "svg-editor.js ($Rev: 1973 $) ";
+		//	var revnums = "svg-editor.js ($Rev: 2042 $) ";
 		//	revnums += svgCanvas.getVersion();
 		//	$('#copyright')[0].setAttribute("title", revnums);
 		

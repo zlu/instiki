@@ -55,7 +55,7 @@ require 'instiki_stringsupport'
 
   # Create a hyperlink to a particular revision of a Wiki page
   def link_to_revision(page, revision_number, text = nil, mode = nil, html_options = {})
-    revision_number == page.revisions.size ?
+    revision_number == page.rev_ids.size ?
       link_to(
         text || page.plain_name,
             {:web => @web.address, :action => 'show', :id => page.name,
@@ -96,7 +96,7 @@ require 'instiki_stringsupport'
 
   # Performs HTML escaping on text, but keeps linefeeds intact (by replacing them with <br/>)
   def escape_preserving_linefeeds(text)
-    h(text).gsub(/\n/, '<br/>').as_utf8
+    h(text).gsub(/\n/, '<br/>').as_utf8.html_safe
   end
 
   def format_date(date, include_time = true)
@@ -109,7 +109,7 @@ require 'instiki_stringsupport'
   end
 
   def rendered_content(page)
-    PageRenderer.new(page.revisions.last).display_content
+    PageRenderer.new(page.current_revision).display_content
   end
 
   def truncate(text, *args)

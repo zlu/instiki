@@ -8,6 +8,7 @@ require_dependency 'chunks/literal'
 require 'chunks/nowiki'
 require 'sanitizer'
 require 'instiki_stringsupport'
+require 'set'
 
 
 # Wiki content is just a string that can process itself with a chain of
@@ -53,10 +54,10 @@ module ChunkManager
   def init_chunk_manager
     @chunks_by_type = Hash.new
     Chunk::Abstract::derivatives.each{|chunk_type|
-      @chunks_by_type[chunk_type] = Array.new
+      @chunks_by_type[chunk_type] = Set.new
     }
     @chunks_by_id = Hash.new
-    @chunks = []
+    @chunks = Set.new
     @chunk_id = 0
   end
 
@@ -208,7 +209,8 @@ class WikiContent < ActiveSupport::SafeBuffer
     @options[:engine].apply_to(self)
     as_utf8
     # unmask in one go. $~[1] is the chunk id
-    gsub!(MASK_RE[ACTIVE_CHUNKS]) do
+    text = self.to_str
+    text.gsub!(MASK_RE[ACTIVE_CHUNKS]) do
       chunk = @chunks_by_id[$~[1].to_i]
       if chunk.nil?
         # if we match a chunkmask that existed in the original content string
@@ -218,7 +220,7 @@ class WikiContent < ActiveSupport::SafeBuffer
         chunk.unmask_text
       end
     end
-    self.replace xhtml_sanitize(self)
+    self.replace xhtml_sanitize(text)
     self.html_safe
   end
 

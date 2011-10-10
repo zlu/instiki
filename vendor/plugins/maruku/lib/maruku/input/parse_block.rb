@@ -122,7 +122,7 @@ module MaRuKu; module In; module Markdown; module BlockLevelParser
 				if c.children.all? {|li| !li.want_my_paragraph} then
 					c.children.each do |d|
 						d.node_type = :li_span
-						d.children = d.children[0].children 
+						d.children = d.children[0].children if d.children[0]
 					end
 				end
 			end 
@@ -130,7 +130,7 @@ module MaRuKu; module In; module Markdown; module BlockLevelParser
 				if c.children.all?{|defi| !defi.want_my_paragraph} then
 					c.children.each do |definition| 
 						definition.definitions.each do |dd|
-							dd.children = dd.children[0].children 
+							dd.children = dd.children[0].children if dd.children[0] 
 						end
 					end
 				end
@@ -482,12 +482,12 @@ module MaRuKu; module In; module Markdown; module BlockLevelParser
 			return
 		end
 		
-		id = match[1]; url = match[2]; title = match[3]; 
+		id = match[1]; url = match[2]; title = match[3] || match[4] || match[5]; 
 		id = sanitize_ref_id(id)
 		
 		hash = self.refs[id] = {:url=>url,:title=>title}
 		
-		stuff=match[4]
+		stuff=match[6]
 		
 		if stuff
 			stuff.split.each do |couple|

@@ -1,9 +1,32 @@
 N.B.: You *must* run
 
      ruby bundle
-     rake upgrade_instiki
+     ruby bundle exec rake upgrade_instiki
 
 after installing the new software, to enjoy the benefits of this new version.
+
+------------------------------------------------------------------------------
+* 0.19.3
+
+New Features:
+* Source view for Revisions
+* Rails updated to 2.3.14 (Security)
+* itextomml updated to 1.4.6
+* Replace REXML with Nokogiri in Maruku and
+  in xhtml_safe_sanitize().
+  (Huge speedup in rendering long pages)
+* MathJax updated to 1.1a final
+
+Bugs Fixed:
+* Bundler upgraded to 1.0.18
+* Fix null search bug
+* Better text/html serialization (thank you, Nokogiri)
+* Fix Maruku footnote backlink (reported by Shamaoke)
+* Fix Maruku link bug
+* Fix Maruku image title bug
+* Fix Maruku hrule, email address and header bugs
+* Fix Maruku bold-in-italics bug
+* Fix Maruku empty list-item bug
 
 ------------------------------------------------------------------------------
 * 0.19.2
@@ -12,12 +35,19 @@ New Features:
 * MathJax rendering for non-MathML capable browsers.
 * RedCloth (Textile) upgraded to 4.x (now handled
   by Bundler).
+* Bundler upgraded to 1.0.7
+* Rails updated to 2.3.11
 
 Bugs Fixed:
 * Redirects and categories of included pages should
   not be inherited. (Suggestion of Andrew Stacey).
 * Bug in Maruku equation handling (reported by Andrew Stacey).
 * SVG-Edit updates and bug-fixes.
+* Bug in editing S5 slideshows.
+* Unvendor Rack
+* Fix Maruku list-parsing bug (reported by Shamaoke)
+* Validate Web address (Reported by Richard Marquez).
+* Fix a well-formedness bug
 
 ------------------------------------------------------------------------------
 * 0.19.1

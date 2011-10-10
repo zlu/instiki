@@ -8,11 +8,11 @@ module CacheSweepingHelper
   end
 
   def expire_cached_summary_pages(web)
-    categories = WikiReference.all(:conditions => "link_type = 'C'")
+    categories = WikiReference.list_categories(web)
     %w(recently_revised list).each do |action|
       expire_action :controller => 'wiki', :web => web.address, :action => action
       categories.each do |category|
-        expire_action :controller => 'wiki', :web => web.address, :action => action, :category => category.referenced_name
+        expire_action :controller => 'wiki', :web => web.address, :action => action, :category => category
       end
     end
 
@@ -26,12 +26,14 @@ module CacheSweepingHelper
   end
 
   def expire_cached_revisions(page)
-    page.revisions.count.times  do |i|
+    page.rev_ids.count.times  do |i|
       revno = i+1
       expire_action :controller => 'wiki', :web => page.web.address,
           :action => 'revision', :id => page.name, :rev => revno
       expire_action :controller => 'wiki', :web => page.web.address,
           :action => 'revision', :id => page.name, :rev => revno, :mode => 'diff'
+      expire_action :controller => 'wiki', :web => page.web.address,
+          :action => 'source', :id => page.name, :rev => revno
     end
   end
 

@@ -12,6 +12,7 @@
 \usepackage{color}
 \usepackage{ucs}
 \usepackage[utf8x]{inputenc}
+\usepackage{xparse}
 \usepackage{hyperref}
 
 %----Macros----------
@@ -146,6 +147,15 @@
     {\ooalign{\box\tw@ \cr \box\z@}}}
 \makeatother
 
+% \mathraisebox{voffset}[height][depth]{something}
+\makeatletter
+\NewDocumentCommand\mathraisebox{moom}{%
+\IfNoValueTF{#2}{\def\@temp##1##2{\raisebox{#1}{$\m@th##1##2$}}}{%
+\IfNoValueTF{#3}{\def\@temp##1##2{\raisebox{#1}[#2]{$\m@th##1##2$}}%
+}{\def\@temp##1##2{\raisebox{#1}[#2][#3]{$\m@th##1##2$}}}}%
+\mathpalette\@temp{#4}}
+\makeatletter
+
 % udots (taken from yhmath)
 \makeatletter
 \def\udots{\mathinner{\mkern2mu\raise\p@\hbox{.}
@@ -155,6 +165,8 @@
 
 %% Fix array
 \newcommand{\itexarray}[1]{\begin{matrix}#1\end{matrix}}
+%% \itexnum is a noop
+\newcommand{\itexnum}[1]{#1}
 
 %% Renaming existing commands
 \newcommand{\underoverset}[3]{\underset{#1}{\overset{#2}{#3}}}

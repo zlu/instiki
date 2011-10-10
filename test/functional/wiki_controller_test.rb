@@ -123,7 +123,7 @@ class WikiControllerTest < ActionController::TestCase
     
     r = process 'edit', 'web' => 'wiki1', 'id' => 'With : Special /> symbols'
     assert_response(:success)
-    xml = REXML::Document.new(r.body)
+    xml = REXML::Document.new(r.body.to_str)
     form = REXML::XPath.first(xml, '//form')
     assert_equal '/wiki1/save/With+%3A+Special+%2F%3E+symbols', form.attributes['action']
   end
@@ -339,6 +339,13 @@ class WikiControllerTest < ActionController::TestCase
       %{lt;svg/&gt;\\end{svg}\\includegraphics\[width=3em\]{foo}$ in kinda} +
       %{ ThatWay in HisWay though MyWay \\OverThere -- see SmartEngine in t} +
       %{hat SmartEngineGUI})), r.body
+  end
+
+  def test_source_with_revision
+    r = process('source', 'web' => 'wiki1', 'id' => 'HomePage', 'rev' => '1')
+
+    assert_response(:success)
+    assert_match Regexp.new(Regexp.escape(%{First revision of the HomePage})), r.body
   end
 
   def test_published
@@ -690,7 +697,7 @@ class WikiControllerTest < ActionController::TestCase
     a = ''.respond_to?(:force_encoding) ? "\u{1D538}\u00FCthorOfNewPage" :
                                           "\360\235\224\270\303\274thorOfNewPage"
     assert_equal a, new_page.author
-    assert_equal "\xF0\x9D\x94\xB8\xC3\xBCthorOfNewPage".as_bytes, r.cookies['author']
+    assert_equal a, r.cookies['author']
   end
 
   def test_save_not_utf8
@@ -1058,6 +1065,7 @@ class WikiControllerTest < ActionController::TestCase
 \usepackage{color}
 \usepackage{ucs}
 \usepackage[utf8x]{inputenc}
+\usepackage{xparse}
 \usepackage{hyperref}
 
 %----Macros----------
@@ -1192,6 +1200,15 @@ class WikiControllerTest < ActionController::TestCase
     {\ooalign{\box\tw@ \cr \box\z@}}}
 \makeatother
 
+% \mathraisebox{voffset}[height][depth]{something}
+\makeatletter
+\NewDocumentCommand\mathraisebox{moom}{%
+\IfNoValueTF{#2}{\def\@temp##1##2{\raisebox{#1}{$\m@th##1##2$}}}{%
+\IfNoValueTF{#3}{\def\@temp##1##2{\raisebox{#1}[#2]{$\m@th##1##2$}}%
+}{\def\@temp##1##2{\raisebox{#1}[#2][#3]{$\m@th##1##2$}}}}%
+\mathpalette\@temp{#4}}
+\makeatletter
+
 % udots (taken from yhmath)
 \makeatletter
 \def\udots{\mathinner{\mkern2mu\raise\p@\hbox{.}
@@ -1201,6 +1218,8 @@ class WikiControllerTest < ActionController::TestCase
 
 %% Fix array
 \newcommand{\itexarray}[1]{\begin{matrix}#1\end{matrix}}
+%% \itexnum is a noop
+\newcommand{\itexnum}[1]{#1}
 
 %% Renaming existing commands
 \newcommand{\underoverset}[3]{\underset{#1}{\overset{#2}{#3}}}
